@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
 
-# read the file 
+# lire le fichier
 df = pd.read_csv(r"/Users/sammyeyong/Documents/Data Analysis Projects/superstore project/train.csv") 
 
 if df.duplicated().sum() > 0: 
@@ -13,69 +13,69 @@ else:
 
 df.head() 
 
-''' Big businesses often don't know which customers matter most 
-because they lack the right data and end up guessing. 
-This means they waste time and money in the wrong areas, 
-losing sales and leaving customers dissatisfied.'''  
+''' Les grandes entreprises ne savent souvent pas quels clients comptent le plus 
+parce qu'elles manquent des bonnes données et finissent par deviner. 
+Cela signifie qu'elles gaspillent du temps et de l'argent dans de mauvais domaines, 
+perdent des ventes et laissent les clients insatisfaits.''' 
 
-# find out what types of customers there are
+# découvrir quels types de clients existent
 types_of_customers = df['Segment'].unique() 
 print(types_of_customers) 
 
-# find out number of customers for each type of customer
+# découvrir le nombre de clients pour chaque type de client
 number_of_customers = df['Segment'].value_counts().reset_index() 
 number_of_customers = number_of_customers.rename(columns={'Segment' : 'Type of Customer'}) 
 print(number_of_customers) 
 
-# put it in a pie chart 
-# we know the percentages of each type of customer.
+# le mettre dans un graphique en secteurs.
+# nous connaissons les pourcentages de chaque type de client.
 plt.pie(number_of_customers['count'], labels=number_of_customers['Type of Customer'], autopct='%1.2f%%') 
 
-# how do we figure out which segments generate the most value CLT ?
-# How much does it cost to acquire a customer in each segment customer acquisition cost CAC ? 
+# comment savoir quels segments génèrent la plus grande valeur CLT ?
+# Combien coûte l'acquisition d'un client dans chaque segment (coût d'acquisition client CAC) ?
 
-# How much did each segment make in sales displayed in bar chart
+# Combien chaque segment a-t-il généré en ventes, affiché dans un graphique à barres
 sales_per_segment = df.groupby('Segment')['Sales'].sum().reset_index() 
 sales_per_segment = sales_per_segment.rename(columns={'Segment' : 'Type Of Customer', 'Sales' : 'Total Sales'}) 
 print(sales_per_segment) 
 plt.bar(sales_per_segment['Type Of Customer'], sales_per_segment['Total Sales']) 
 
-'''as a business we want to make sure our most loyal customers stay happy. 
-We can find out who is loyal by number of purchases or amount spent. 
-Then we can take this and send them things like marketing emails.'''
+'''En tant qu'entreprise, nous voulons nous assurer que nos clients les plus fidèles restent satisfaits.
+Nous pouvons identifier qui est fidèle par le nombre d'achats ou le montant dépensé.
+Ensuite, nous pouvons leur envoyer des choses comme des emails marketing.'''
 
 customers_order_frequency = df.groupby(['Customer ID', 'Customer Name', 'Segment'])['Order ID'].count().reset_index()
 customers_order_frequency.rename(columns={'Order ID' : 'Total Orders'}, inplace=True) 
 
-# let us identify our repeat customers from most to least. 
+# identifions nos clients récurrents du plus au moins fidèle.
 repeat_customers = customers_order_frequency[customers_order_frequency['Total Orders'] >= 1] 
 repeat_customers_sorted = repeat_customers.sort_values(by='Total Orders', ascending=False) 
 
-''' we see that Consumers are priority for our marketing efforts. 
-We also have the other segments and must cater to them.'''
+'''Nous voyons que les consommateurs sont la priorité de nos efforts marketing. 
+Nous avons aussi les autres segments et devons en tenir compte.'''
 print(repeat_customers_sorted.head(12).reset_index(drop=True)) 
 
-''' We can also identify our loyal customers by sales amount. 
-If someone places 35 orders for 1 euro, they are not worth it.''' 
+'''Nous pouvons aussi identifier nos clients fidèles par le montant des ventes. 
+Si quelqu'un passe 35 commandes pour 1 euro, il n'est pas rentable.'''
 customer_sales = df.groupby(['Customer ID', 'Customer Name', 'Segment'])['Sales'].sum().reset_index() 
 top_spenders = customer_sales.sort_values(by='Sales', ascending=False) 
 print(top_spenders.head(12).reset_index(drop=True)) 
 
-# Top customers doesn't reflect spending habits.
-# We will dedicate to the ones who spend the most money. 
+# Les meilleurs clients ne reflètent pas les habitudes de dépenses.
+# Nous nous concentrerons sur ceux qui dépensent le plus d'argent.
 
-''' We want to know which shipping methods customers prefer, 
-and which are most cost effective and reliable. ''' 
+'''Nous voulons savoir quels modes de livraison les clients préfèrent,
+et lesquels sont les plus rentables et fiables.'''
 shipping_model = df['Ship Mode'].value_counts().reset_index()
 shipping_model = shipping_model.rename(columns={'index': 'Use Frequency', 'Ship Mode': 'Mode Of Shipment'}) 
 print(shipping_model)  
 
-# Same thing, but in a pie chart
+# Même chose, mais sous forme de graphique en secteurs.
 plt.pie(shipping_model['count'], labels=shipping_model['Mode Of Shipment'], autopct='%1.2f%%') 
 
-'''Often companies don't know how their plants in each region are doing. 
-For example, under performance or high potential areas. 
-It is best to find out sales for each city or region''' 
+'''Souvent, les entreprises ne savent pas comment leurs usines dans chaque région se comportent. 
+Par exemple, les zones sous-performantes ou à fort potentiel. 
+Il est préférable de connaître les ventes pour chaque ville ou région.'''
 state = df['State'].value_counts().reset_index() 
 state = state.rename(columns={'index':'State', 'State':'Number Of Customers'})
 print(state.head(20)) 
@@ -87,18 +87,18 @@ state_sales = df.groupby(['State'])['Sales'].sum().reset_index()
 top_sales = state_sales.sort_values(by='Sales', ascending=False) 
 print(top_sales.head(10).reset_index(drop=True)) 
 
-#NY and LA are our biggest markets
+# New York et Los Angeles sont nos plus grands marchés.
 city_sales = df.groupby(['City'])['Sales'].sum().reset_index() 
 top_city_sales = city_sales.sort_values(by='Sales', ascending=False) 
 print(top_city_sales.head(10).reset_index(drop=True)) 
 
-# We want to track down our most popular category of products. Even popular category per region. 
+# Nous voulons suivre notre catégorie de produits la plus populaire. Même les catégories populaires par région.
 products = df['Category'].unique() 
 print(products) 
-#subcategories too 
+# sous-catégories aussi.
 product_subcategory = df['Sub-Category'].unique() 
 print(product_subcategory) 
-# see how many subcategories each category has. 
+# voir combien de sous-catégories chaque catégorie a.
 subcategory_count = df.groupby('Category')['Sub-Category'].nunique().reset_index() 
 subcategory_count = subcategory_count.sort_values(by='Sub-Category', ascending=False) 
 print(subcategory_count) 
@@ -107,7 +107,7 @@ subcategory_count_sales = df.groupby(['Category', 'Sub-Category'])['Sales'].sum(
 subcategory_count_sales = subcategory_count_sales.sort_values(by='Sales', ascending=False) 
 print(subcategory_count_sales) 
 
-#Which category has the most amount of sales. 
+# Quelle catégorie a généré le plus de ventes ?
 product_category = df.groupby(['Category'])['Sales'].sum().reset_index() 
 top_product_category = product_category.sort_values(by='Sales', ascending=False) 
 print(top_product_category.reset_index(drop=True)) 
@@ -124,7 +124,7 @@ yearly_sales = yearly_sales.rename(columns={'Order Date': 'Year', 'Sales': 'Tota
 print(yearly_sales) 
 plt.bar(yearly_sales['Year'], yearly_sales['Total Sales']) 
 
-# this is a better graph because you get to see when things changed.
+# Ce graphique est meilleur car il permet de voir quand les choses ont changé.
 plt.plot(yearly_sales['Year'], yearly_sales['Total Sales'], marker='o', linestyle='-') 
 
 df['Order Date'] = pd.to_datetime(df['Order Date'], dayfirst=True) 
@@ -134,14 +134,14 @@ quarterly_sales = quarterly_sales.reset_index()
 quarterly_sales = quarterly_sales.rename(columns= {'Order Date': 'Quarter', 'Sales': 'Total Sales'}) 
 print(quarterly_sales) 
 
-# We see something in Q3 and Q4 changed
+# Nous voyons que quelque chose a changé au T3 et au T4.
 plt.plot(quarterly_sales['Quarter'], quarterly_sales['Total Sales'], marker='o', linestyle='--') 
 
 plt.tight_layout() 
 plt.xticks(rotation=75) 
 plt.show() 
 
-# Now we look at each month 
+# Maintenant, nous regardons chaque mois.
 df['Order Date'] = pd.to_datetime(df['Order Date'], dayfirst=True) 
 yearly_sales = df[df['Order Date'].dt.year==2018] 
 monthly_sales = yearly_sales.resample('M', on='Order Date')['Sales'].sum() 
@@ -151,16 +151,16 @@ print(monthly_sales)
 
 plt.plot(monthly_sales['Month'], monthly_sales['Total Monthly Sales'], marker='o', linestyle='--') 
 
-'''Companies wanting to expand to new regions face challenges of finding out 
-the promising regions. You also want to stay ahead of the competition by finding out where 
-the competitors are having the most success and plan accordingly.''' 
+'''Les entreprises souhaitant s'étendre dans de nouvelles régions font face au défi de découvrir
+les régions prometteuses. Vous voulez aussi rester en avance sur la concurrence en découvrant où
+les concurrents rencontrent le plus de succès et planifier en conséquence.'''
 import plotly.graph_objects as go 
 from plotly.subplots import make_subplots 
 
-# Initialize Plotly in Jupyter notebook mode 
+# Initialiser Plotly en mode Jupyter notebook.
 import plotly.io as pio 
 
-#Create a mapping for all 50 states 
+# Créer une carte pour les 50 états.
 all_state_mapping = {
     "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
     "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
@@ -178,16 +178,16 @@ all_state_mapping = {
 
 } 
 
-# Add the Abbreviation column to the Dataframe 
+# Ajouter la colonne Abréviation au Dataframe.
 df['Abbreviation'] = df['State'].map(all_state_mapping) 
 
-# Group by State and calculate the sum of sales 
+# Grouper par État et calculer la somme des ventes.
 sum_of_sales = df.groupby('State')['Sales'].sum().reset_index() 
 
-# Add Abbreviation to sum_of_sales 
+# Ajouter l'Abréviation à sum_of_sales.
 sum_of_sales['Abbreviation'] = sum_of_sales['State'].map(all_state_mapping) 
 
-# Create a choropleth map using Plotly 
+# Créer une carte choroplèthe avec Plotly.
 fig = go.Figure(data=go.Choropleth(
     locations=sum_of_sales['Abbreviation'], 
     locationmode='USA-states', 
@@ -203,7 +203,7 @@ fig.update_layout(
 
 fig.show()
 
-# bar chart for each state 
+# Graphique à barres pour chaque état.
 sum_of_sales = df.groupby('State')['Sales'].sum().reset_index() 
 
 sum_of_sales = sum_of_sales.sort_values(by='Sales', ascending=False) 
@@ -218,16 +218,16 @@ plt.title('Total Sales by State')
 
 import plotly.express as px
 
-# Summarise the sales data by category and sub-category.
+# Résumer les données de ventes par catégorie et sous-catégorie.
 df_summary = df.groupby(['Category', 'Sub-Category'])['Sales'].sum().reset_index() 
-# Create a nested pie chart 
+# Créer un graphique en secteurs imbriqué.
 fig = px.sunburst(
     df_summary, path=['Category', 'Sub-Category'], values='Sales') 
 fig.show() 
 
-# Summarise the sales data by category, ship mode and sub-category.
+# Résumer les données de ventes par catégorie, mode de livraison et sous-catégorie.
 df_summary = df.groupby(['Category', 'Ship Mode', 'Sub-Category'])['Sales'].sum().reset_index() 
-# Create a treemap 
+# Créer un treemap.
 fig = px.treemap(df_summary, path=['Category', 'Ship Mode', 'Sub-Category'], values='Sales') 
 fig.show()
 plt.show()
